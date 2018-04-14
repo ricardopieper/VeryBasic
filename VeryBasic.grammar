@@ -1,0 +1,61 @@
+TokenIdentifier: _?[A-Za-z]{1}[A-Za-z0-9_]*
+TokenAttribution: '='
+TokenNewLine: '\r\n' | '\n'
+
+TokenNumberLiteral: $(?:[0-9]*)\.(?:[0-9*])^ | $\.(?:[0-9*])^  |  $(?:[0-9*])\.^ | $[0-9]*^  //.99, 99., 99.99, 99
+TokenStringLiteral: \"(.*)?\"
+TokenBooleanLiteral: (TokenIdentifier)true, (TokenIdentifier)false
+TokenLiteral = TokenBooleanLiteral | TokenNumberLiteral | TokenStringLiteral
+
+TokenBinOp = '>' | '<' | '>=' | '<=' | '==' | '!=' | '||' | '&&' | '*' | '/' | '+' | '-' 
+TokenUnaryOp = '!'
+
+Value = TokenLiteral | TokenIdentifier
+
+Call = TokenIdentifier TokenOpenParen ExpressionList TokenCloseParen  // function(expr) 
+      | TokenIdentifier TokenOpenParen TokenCloseParen            // function()
+
+TokenComma = ','
+
+ExpressionList = Expression | Expression TokenComma ExpressionList
+
+Expression = Expression TokenBinOp Expression                              // ex: 9 + 9, 1 + 1 + 1,   call(lol) + call(1 + 5)
+            | TokenOpenParen Expression TokenCloseParen                    // ex: (9)
+            | Call                                                         // ex: function(9), function("asdsad"), function(9 + (9))
+            | TokenUnaryOp Expression                                      // ex: (!function(false)), !true, !(9 == 3 * 3)
+            | Value                                                        // ex: 9.99 | "literalStr" | identifier
+
+
+Attribution: TokenIdentifier TokenAttribution Expression TokenNewLine
+
+Statement =   Attribution 
+            | Call
+            | If
+            | While
+            | [Statement]
+
+TokenIf = 'if'
+TokenEndIf = 'endif'
+TokenElseIf = 'elseif'
+
+TokenWhile = 'while'
+TokenEndWhile = 'endwhile'
+
+If = TokenIf Expression TokenNewLine 
+       [Statement] TokenNewLine 
+     TokenEndIf 
+   | 
+     TokenIf Expression TokenNewLine 
+       [Statement] TokenNewLine 
+     TokenElseIf TokenNewLine
+       [Statement]
+     TokenEndIf  
+
+While = TokenWhile Expression TokenNewLine
+            [Statement] TokenNewLine
+        TokenEndWhile
+
+
+
+
+
